@@ -51,7 +51,7 @@ public class Exercise2_3 : MonoBehaviour
         }
         else if (b.body.mass <= 25 && b.body.mass >= 15)
         {
-            b.gameObject.transform.localScale -= changeInScale * Time.deltaTime;
+            b.gameObject.transform.localScale += -changeInScale * Time.deltaTime;
         }
         else
         {
