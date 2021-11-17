@@ -10,8 +10,6 @@ public class SporadicFlyBehavior : MonoBehaviour
     Vector3 acceleration = new Vector3(0, 0, 0);
     float topSpeed = 4f;
 
-    //Screen information
-    //Vector3 minimumPosition, maximumPosition;
     //Box walls to help with boundaries for fly.
     public Transform leftWall;
     public Transform rightWall;
