@@ -16,21 +16,54 @@ public class FrogBehavior : MonoBehaviour
     public Transform frontWall;
     public Transform frogSpawn;
 
+    public GameObject fly;
+
     public bool jumpCooldownElapsed = true;
 
     Frog frog;
+    FrogTongue frogTongue;
 
     // Start is called before the first frame update
     void Start()
     {
         frog = new Frog(frogSpawn.position, leftWall.position.x, rightWall.position.x, floor.position.y, ceiling.position.y, frontWall.position.z, backWall.position.z);
+        frogTongue = new FrogTongue(frogSpawn.position);
+        frogTongue.oGameObject.transform.SetParent(frog.frogObject.transform);
     }
 
     // Update is called once per frame
     void Update()
     {
+        fly = GameObject.Find("fly");
+
         //make sure the frog is still in the box
         frog.CheckBoundaries();
+
+        //frogTongue.velocity = fly.transform.position;
+        //frogTongue.amplitude = fly.transform.position;
+
+        ////Each oscillator object oscillating on the x-axis
+        //float x = Mathf.Sin(frogTongue.angle.x) * frogTongue.amplitude.x;
+        ////Each oscillator object oscillating on the y-axis
+        //float y = Mathf.Sin(frogTongue.angle.y) * frogTongue.amplitude.y;
+        //float z = Mathf.Sin(frogTongue.angle.z) * frogTongue.amplitude.z;
+
+        ////Add the oscillator's velocity to its angle
+        //frogTongue.angle += frogTongue.velocity;
+
+        //frogTongue.oGameObject.transform.Translate(new Vector3(x, y, z) * Time.deltaTime);
+
+        ////frogTongue.oGameObject.transform.LookAt(fly.transform.position);
+        ////frogTongue.oGameObject.transform.Translate(fly.transform.position * Time.deltaTime);
+
+
+        //// Draw the line for each oscillator
+        //frogTongue.lineRender.SetPosition(0, frog.frogObject.transform.position);
+        ////Debug.Log(sMover.mover.transform.position);
+        //frogTongue.lineRender.SetPosition(1, frogTongue.oGameObject.transform.position);
+        ////Destroy(frog.frogObject);
+        ////Destroy(frogTongue.oGameObject);
+        ////Destroy(frogTongue.lineRender);
 
         //only jump every 2 seconds
         if (jumpCooldownElapsed)
@@ -44,7 +77,35 @@ public class FrogBehavior : MonoBehaviour
     IEnumerator JumpCooldown()
     {
         yield return new WaitForSeconds(jumpCooldownTime);
+
         frog.Jump();
+
+        frogTongue.velocity = fly.transform.position;
+        frogTongue.amplitude = fly.transform.position;
+
+        //Each oscillator object oscillating on the x-axis
+        float x = Mathf.Sin(frogTongue.angle.x) * frogTongue.amplitude.x;
+        //Each oscillator object oscillating on the y-axis
+        float y = Mathf.Sin(frogTongue.angle.y) * frogTongue.amplitude.y;
+        float z = Mathf.Sin(frogTongue.angle.z) * frogTongue.amplitude.z;
+
+        //Add the oscillator's velocity to its angle
+        frogTongue.angle += frogTongue.velocity;
+
+       // frogTongue.oGameObject.transform.Translate(new Vector3(x, y, z) * Time.deltaTime);
+
+        frogTongue.oGameObject.transform.LookAt(fly.transform.position);
+        //frogTongue.oGameObject.transform.Translate(fly.transform.position * Time.deltaTime);
+
+
+        // Draw the line for each oscillator
+        frogTongue.lineRender.SetPosition(0, frog.frogObject.transform.position);
+        //Debug.Log(sMover.mover.transform.position);
+        frogTongue.lineRender.SetPosition(1, frogTongue.oGameObject.transform.position);
+        //Destroy(frog.frogObject);
+        //Destroy(frogTongue.oGameObject);
+        //Destroy(frogTongue.lineRender);
+
         jumpCooldownElapsed = true;
     }
 }
@@ -55,6 +116,7 @@ public class Frog
 
     public Rigidbody body;
     public GameObject frogObject;
+    public SphereCollider frogCollider;
     public float radius;
 
     float xMin;
@@ -76,6 +138,9 @@ public class Frog
 
         frogObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         body = frogObject.AddComponent<Rigidbody>();
+        frogCollider = frogObject.GetComponent<SphereCollider>();
+
+        frogCollider.enabled = false;
 
         radius = 1f;
 
@@ -134,5 +199,55 @@ public class Frog
             jumpForce = new Vector3(Random.Range(-10f, 10f), 25f, Random.Range(-10f, 10f));
             body.AddForce(jumpForce, ForceMode.Impulse);
         }
+    }
+}
+
+public class FrogTongue
+{
+    public float maxDistance = 1f;
+    public float minDistance = 0f;
+    float radius;
+
+    // The basic properties of an oscillator class
+    public Vector3 velocity, angle, amplitude;
+
+    // The window limits
+    private Vector3 maximumPos;
+
+    // Gives the class a GameObject to draw on the screen
+    public GameObject oGameObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+
+    //Create variables for rendering the line between two vectors
+    public LineRenderer lineRender;
+
+    public FrogTongue(Vector3 position)
+    {
+
+        radius = 1f;
+
+        oGameObject.transform.position = position + Vector3.up * radius;
+
+        //findWindowLimits();
+        angle = Vector3.zero;
+        velocity = new Vector3(0.05f, 0.05f, 0.05f);//Random.Range(-0.05f, 0.05f), 0f, Random.Range(-0.05f, 0.05f));
+        amplitude = new Vector3(5f, 5f, 5f);//Random.Range(-maximumPos.x / 2, maximumPos.x / 2), Random.Range(-maximumPos.y / 2, maximumPos.y / 2), Random.Range(-maximumPos.z / 2, maximumPos.z / 2));
+
+        //We need to create a new material for WebGL
+        Renderer r = oGameObject.GetComponent<Renderer>();
+        r.material = new Material(Shader.Find("Diffuse"));
+
+        // Create a GameObject that will be the line
+        GameObject lineDrawing = new GameObject();
+        lineDrawing.transform.SetParent(oGameObject.transform);
+
+        //Add the Unity Component "LineRenderer" to the GameObject lineDrawing.
+        lineRender = lineDrawing.AddComponent<LineRenderer>();
+        lineRender.material = new Material(Shader.Find("Diffuse"));
+
+        //Begin rendering the line between the two objects. Set the first point (0) at the centerSphere Position
+        //Make sure the end of the line (1) appears at the new Vector3
+        Vector3 center = new Vector2(oGameObject.transform.position.x, oGameObject.transform.position.y);
+        lineRender.SetPosition(0, center);
+        lineRender.SetPosition(1, center);
     }
 }

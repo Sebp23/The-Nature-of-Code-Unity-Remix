@@ -26,6 +26,7 @@ public class SporadicFlyBehavior : MonoBehaviour
     {
         //Create our fly
         fly = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        fly.name = "fly";
     }
 
     // Update is called once per frame
