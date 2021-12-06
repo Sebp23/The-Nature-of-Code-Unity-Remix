@@ -14,57 +14,19 @@ public class SpiderBehavior : MonoBehaviour
 
     public Transform spiderSpawn;
 
-    List<SpiderLegOscillator> legs = new List<SpiderLegOscillator>();
     SpiderMover sMover;
 
     // Start is called before the first frame update
     void Start()
     {
         sMover = new SpiderMover(spiderSpawn.position, leftWall.position.x, rightWall.position.x, floor.position.y, ceiling.position.y, frontWall.position.z, backWall.position.z);
-
-        while (legs.Count < 8)
-        {
-            legs.Add(new SpiderLegOscillator(spiderSpawn.position, leftWall.position.x, rightWall.position.x, floor.position.y, ceiling.position.y, frontWall.position.z, backWall.position.z));//oMover.mover.transform.position));
-        }
-
-        foreach (SpiderLegOscillator s in legs)
-        {
-            s.oGameObject.transform.SetParent(sMover.mover.transform);
-
-            //make the leg color black to differentiate from the spider body
-            Renderer sphereColor = s.oGameObject.GetComponent<Renderer>();
-            sphereColor.material.color = new Color(0f, 0f, 0f);
-        }
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
         sMover.CheckBoundaries();
-
-        foreach (SpiderLegOscillator s in legs)
-        {
-            s.CheckLegBoundary();
-            //Each oscillator object oscillating on the x-axis
-            float x = Mathf.Sin(s.angle.x) * s.amplitude.x;
-            //Each oscillator object oscillating on the y-axis
-            float y = Mathf.Sin(s.angle.y) * s.amplitude.y;
-            //Each oscillator object oscillating on the z-axis
-            float z = Mathf.Sin(s.angle.z) * s.amplitude.z;
-
-            //Add the oscillator's velocity to its angle
-            s.angle += s.velocity;
-
-            // Draw the line for each oscillator
-            s.lineRender.SetPosition(0, sMover.mover.transform.position);
-            Debug.Log(sMover.mover.transform.position);
-            s.lineRender.SetPosition(1, s.oGameObject.transform.position);
-
-            //Move the oscillator
-            s.oGameObject.transform.Translate(new Vector3(x, y, z) * Time.deltaTime);
-            s.CheckLegBoundary();
-        }
-
+        sMover.MoveLegs();
         sMover.Move();
     }
 }
@@ -75,6 +37,8 @@ public class SpiderMover
 
     Vector3 location = new Vector3(0, 0, 0);
     Vector3 velocity = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)); //1f, 1f, 1f);
+
+    List<SpiderLegOscillator> legs = new List<SpiderLegOscillator>();
 
     public Vector3 spiderPosition;
 
@@ -94,25 +58,43 @@ public class SpiderMover
         this.zMin = zMin;
         this.zMax = zMax;
 
-        mover = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        mover = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
        //mover.transform.position = new Vector3(Random.Range(xMin))
 
         mover.AddComponent<Rigidbody>();
         body = mover.GetComponent<Rigidbody>();
+        body.freezeRotation = true;
         body.useGravity = false;
 
         //body.freezeRotation = true;
 
-        BoxCollider moverCollider = mover.GetComponent<BoxCollider>();
+        SphereCollider moverCollider = mover.GetComponent<SphereCollider>();
         moverCollider.enabled = false;
 
         location = position + Vector3.up * radius;
         Debug.Log(mover.transform.position + "|" + position);
 
         mover.name = "Spider";
+        mover.tag = "FrogPredator";
 
         spiderPosition = mover.transform.position;
+
+        while (legs.Count < 8)
+        {
+            Vector3 spiderCurrentPos = mover.transform.position;
+
+            legs.Add(new SpiderLegOscillator(spiderCurrentPos, xMin, xMax, yMin, yMax, zMin, zMax));//oMover.mover.transform.position));
+        }
+
+        foreach (SpiderLegOscillator s in legs)
+        {
+            s.oGameObject.transform.SetParent(mover.transform);
+
+            //make the leg color black to differentiate from the spider body
+            Renderer sphereColor = s.oGameObject.GetComponent<Renderer>();
+            sphereColor.material.color = new Color(0f, 0f, 0f);
+        }
     }
 
     public void Move()
@@ -151,6 +133,32 @@ public class SpiderMover
             velocity.z = -velocity.z;
         }
     }
+
+    public void MoveLegs()
+    {
+        foreach (SpiderLegOscillator s in legs)
+        {
+            s.CheckLegBoundary();
+            //Each oscillator object oscillating on the x-axis
+            float x = Mathf.Sin(s.angle.x) * s.amplitude.x;
+            //Each oscillator object oscillating on the y-axis
+            float y = Mathf.Sin(s.angle.y) * s.amplitude.y;
+            //Each oscillator object oscillating on the z-axis
+            float z = Mathf.Sin(s.angle.z) * s.amplitude.z;
+
+            //Add the oscillator's velocity to its angle
+            s.angle += s.velocity;
+
+            // Draw the line for each oscillator
+            s.lineRender.SetPosition(0, mover.transform.position);
+            Debug.Log(mover.transform.position);
+            s.lineRender.SetPosition(1, s.oGameObject.transform.position);
+
+            //Move the oscillator
+            s.oGameObject.transform.Translate(new Vector3(x, y, z) * Time.deltaTime);
+            s.CheckLegBoundary();
+        }
+    }
 }
 
 public class SpiderLegOscillator
@@ -178,11 +186,13 @@ public class SpiderLegOscillator
         this.zMin = zMin;
         this.zMax = zMax;
 
+        oGameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+
         oGameObject.transform.position = startPosition;
         
         angle = Vector3.zero;
         velocity = new Vector3(Random.Range(-0.05f, 0.05f), 0f, Random.Range(-0.05f, 0.05f));
-        amplitude = new Vector3(0.75f, 0f, 0.75f);
+        amplitude = new Vector3(0.5f, 0f, 0.5f);
 
         //We need to create a new material for WebGL
         Renderer r = oGameObject.GetComponent<Renderer>();
@@ -195,6 +205,8 @@ public class SpiderLegOscillator
         //Add the Unity Component "LineRenderer" to the GameObject lineDrawing.
         lineRender = lineDrawing.AddComponent<LineRenderer>();
         lineRender.material = new Material(Shader.Find("Diffuse"));
+
+        lineRender.startWidth = 0.5f;
 
         //Begin rendering the line between the two objects. Set the first point (0) at the centerSphere Position
         //Make sure the end of the line (1) appears at the new Vector3

@@ -58,7 +58,7 @@ public class Fly
     float backWall;
     float frontWall;
 
-    GameObject fly;
+    public GameObject fly;
 
     public Fly(Vector3 spawnPosition, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax)
     {

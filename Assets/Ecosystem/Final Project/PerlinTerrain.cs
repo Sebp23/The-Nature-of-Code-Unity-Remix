@@ -19,10 +19,10 @@ public class PerlinTerrain : MonoBehaviour
         GameObject terrain = new GameObject();
         terrain.name = "terrain";
 
-        xOff = 0f;
+        xOff = -10f;
         for(int i = 0; i < cols; i++)
         {
-            yOff = 0f;
+            yOff = -10f;
             for(int j = 0; j < rows; j++)
             {
                 //we add our code here
@@ -34,7 +34,7 @@ public class PerlinTerrain : MonoBehaviour
                 perlinRotation.eulerAngles = perlinVectors * 100f;
                 
                 //Dealing with position
-                float positionTheta = ExtensionMethods.map(Mathf.PerlinNoise(xOff, yOff), 0f, 1f, 0f, 10f);
+                float positionTheta = ExtensionMethods.map(Mathf.PerlinNoise(xOff, yOff), 0f, 1f, 0f, 0f);
                 terrainItem = Instantiate(terrainItem, new Vector3(i, positionTheta, j), perlinRotation);
 
                 //Adding a splash of color

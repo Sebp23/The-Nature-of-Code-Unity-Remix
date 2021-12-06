@@ -6,6 +6,9 @@ TagManager:
   tags:
   - wall
   - cell
+  - FlyPredator
+  - FrogPredator
+  - SpiderPredator
   layers:
   - Default
   - TransparentFX

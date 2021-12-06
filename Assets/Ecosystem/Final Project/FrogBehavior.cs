@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class FrogBehavior : MonoBehaviour
 {
-    //how long the frog should wait between jumps.
-   // public float jumpCooldownTime;
+    /// <summary>
+    /// All of the blocks of commented code are going to be modified eventuall for the frog tongue, which is why they haven't
+    /// been deleted.
+    /// </summary>
 
     //Box walls to help with boundaries for frog.
     public Transform leftWall;
@@ -143,7 +145,15 @@ public class Frog
 
         frogObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         frogObject.name = "Frog";
+        frogObject.tag = "FlyPredator";
         body = frogObject.AddComponent<Rigidbody>();
+
+        ///<summary>
+        ///The PredatorAttack Script is having weird force errors, and I'm not quite sure how to fix them
+        /// </summary>
+        //PredatorAttack frogPredator = frogObject.AddComponent<PredatorAttack>();
+        //frogPredator.predatorTag = "FlyPredator";
+
         frogCollider = frogObject.GetComponent<SphereCollider>();
         Renderer frogRenderer = frogObject.GetComponent<Renderer>();
 
