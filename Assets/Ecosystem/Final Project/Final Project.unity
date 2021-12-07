@@ -421,7 +421,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfb6e30d62dac5d4cb87a6e08bbb4a62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sporadicFlyPopulation: 5
+  sporadicFlyPopulation: 10
   sporadicFlyMinPopulation: 1
   frogPopulation: 5
   frogMinPopulation: 1

@@ -119,6 +119,7 @@ public class Frog
 
     public Vector3 jumpForce;
 
+    public List<Transform> flyPrey = new List<Transform>();
     public Rigidbody body;
     public GameObject frogObject;
     public SphereCollider frogCollider;
@@ -290,6 +291,32 @@ public class Frog
             jumpForce = new Vector3(Random.Range(-10f, 10f), 25f, Random.Range(-10f, 10f));
             body.AddForce(jumpForce, ForceMode.Impulse);
         }
+    }
+
+    public Transform GetClosestPrey(List<Transform> prey)
+    {
+        Transform bestTarget = null;
+        float closestDistanceSqr = Mathf.Infinity;
+        Vector3 currentPosition = frogObject.transform.position;
+        foreach (Transform potentialTarget in prey)
+        {
+            Vector3 directionToTarget = potentialTarget.position - currentPosition;
+            float dSqrToTarget = directionToTarget.sqrMagnitude;
+            if (dSqrToTarget < closestDistanceSqr)
+            {
+                closestDistanceSqr = dSqrToTarget;
+                bestTarget = potentialTarget;
+            }
+        }
+
+        return bestTarget;
+    }
+
+    //TODO add way for frog to kill fly
+    public void HuntClosestPrey(GameObject predator, Transform preyPos)
+    {
+        Vector3 relativePos = preyPos.position - predator.transform.position;
+        predator.GetComponent<Rigidbody>().AddForce(100 * relativePos);
     }
 }
 

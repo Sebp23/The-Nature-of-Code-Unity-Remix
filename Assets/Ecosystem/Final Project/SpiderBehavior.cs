@@ -35,6 +35,8 @@ public class SpiderMover
 {
     float radius = 1f;
 
+    public List<Transform> frogPrey = new List<Transform>();
+
     Vector3 location = new Vector3(0, 0, 0);
     Vector3 velocity = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)); //1f, 1f, 1f);
 
@@ -60,14 +62,10 @@ public class SpiderMover
 
         mover = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
-       //mover.transform.position = new Vector3(Random.Range(xMin))
-
         mover.AddComponent<Rigidbody>();
         body = mover.GetComponent<Rigidbody>();
         body.freezeRotation = true;
         body.useGravity = false;
-
-        //body.freezeRotation = true;
 
         SphereCollider moverCollider = mover.GetComponent<SphereCollider>();
         moverCollider.enabled = false;
@@ -99,12 +97,10 @@ public class SpiderMover
 
     public void Move()
     {
-        // Now we apply the positions to the mover to put it in it's place
-        //mover.transform.position += new Vector3(x, y, z);
 
         location += velocity * Time.deltaTime;
 
-        // Now we apply the positions to the fly to put it in it's place
+        // Now we apply the positions to the spider mover to put it in it's place
         mover.transform.position = new Vector3(location.x, location.y, location.z);
     }
 
@@ -116,21 +112,40 @@ public class SpiderMover
         bool yHitBorder = location.y > yMax - radius || location.y < yMin + radius;
         bool zHitBorder = location.z > zMax - radius || location.z < zMin + radius;
 
-        // If the mover has hit at all, we will mirror it's speed with the corrisponding boarder
+        Vector3 originXPositive = new Vector3(xMin + radius, mover.transform.position.y, mover.transform.position.z);
+        Vector3 originXNegative = new Vector3(xMax - radius, mover.transform.position.y, mover.transform.position.z);
+        Vector3 originYPositive = new Vector3(mover.transform.position.x, yMin + radius, mover.transform.position.z);
+        Vector3 originYNegative = new Vector3(mover.transform.position.x, 1f * radius, mover.transform.position.z);
+        Vector3 originZPositive = new Vector3(mover.transform.position.x, mover.transform.position.y, zMin + radius);
+        Vector3 originZNegative = new Vector3(mover.transform.position.x, mover.transform.position.y, zMax - radius);
 
-        if (xHitBorder)
+        if (body.position.x - radius < xMin)
         {
-            velocity.x = -velocity.x;
+            mover.transform.position = originXPositive;
+        }
+        else if (body.position.x + radius > xMax)
+        {
+            mover.transform.position = originXNegative;
         }
 
-        if (yHitBorder)
+        if (body.position.y - radius < yMin)
         {
-            velocity.y = 0;
+            body.velocity = Vector3.zero;
+            mover.transform.position = originYPositive;
+        }
+        else if (body.position.y > 1f * radius)
+        {
+            body.velocity = Vector3.zero;
+            mover.transform.position = originYNegative;
         }
 
-        if (zHitBorder)
+        if (body.position.z - radius < zMin)
         {
-            velocity.z = -velocity.z;
+            mover.transform.position = originZPositive;
+        }
+        else if (body.position.z + radius > zMax)
+        {
+            mover.transform.position = originZNegative;
         }
     }
 
@@ -158,6 +173,51 @@ public class SpiderMover
             s.oGameObject.transform.Translate(new Vector3(x, y, z) * Time.deltaTime);
             s.CheckLegBoundary();
         }
+    }
+
+    public Transform GetClosestPrey(List<Transform> prey)
+    {
+        Transform bestTarget = null;
+        float closestDistanceSqr = Mathf.Infinity;
+        Vector3 currentPosition = mover.transform.position;
+        foreach (Transform potentialTarget in prey)
+        {
+            Vector3 directionToTarget = potentialTarget.position - currentPosition;
+            float dSqrToTarget = directionToTarget.sqrMagnitude;
+            if (dSqrToTarget < closestDistanceSqr)
+            {
+                closestDistanceSqr = dSqrToTarget;
+                bestTarget = potentialTarget;
+            }
+        }
+
+        Debug.Log("Best Target for Spider: " + bestTarget.position);
+        return bestTarget;
+        
+    }
+
+    //make it return a bool and use this bool to decide when to hunt new object
+    //TODO find a way to make sure frog methods stop when it is caught by spider
+    public bool HuntClosestPrey(GameObject predator, Transform preyTransform)
+    {
+        bool huntSuccessful = false;
+
+        Vector3 relativePos = preyTransform.position - predator.transform.position;
+        relativePos = new Vector3(relativePos.x, 0f, relativePos.z);
+        predator.GetComponent<Rigidbody>().AddForce(2f * relativePos);
+        float dist = Vector3.Distance(preyTransform.position, predator.transform.position);
+        if (dist <= 4)
+        {
+            preyTransform.gameObject.GetComponent<FrogBehavior>().enabled = false;
+            Object.Destroy(preyTransform.gameObject);
+            huntSuccessful = true;
+        }
+        else
+        {
+            huntSuccessful = false;
+        }
+
+        return huntSuccessful;
     }
 }
 

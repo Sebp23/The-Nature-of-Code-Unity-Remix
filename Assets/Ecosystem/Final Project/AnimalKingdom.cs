@@ -23,13 +23,13 @@ public class AnimalKingdom : MonoBehaviour
     public PerlinTerrain terrain;
     public float terrainMin;
 
-    //Walls (Temporary)
-    public float xMin = -10f;
-    public float xMax = 10f;
-    public float yMin = 0f;
-    public float yMax = 20f;
-    public float zMin = -10f;
-    public float zMax = 10f;
+    //Boundaries
+    public float xMin;
+    public float xMax;
+    public float yMin;
+    public float yMax;
+    public float zMin;
+    public float zMax;
 
     // Start is called before the first frame update
     void Start()
@@ -68,14 +68,13 @@ public class AnimalKingdom : MonoBehaviour
             {
                 fr.jumpCooldownElapsed = false;
                 StartCoroutine(fr.JumpCooldown());
-                List<Transform> flyPrey = new List<Transform>();
                 foreach (Fly f in flies)
                 {
-                    flyPrey.Add(f.fly.transform);
+                    fr.flyPrey.Add(f.fly.transform);
                 }
-                Transform preyToTarget = GetClosestPrey(flyPrey);
+                Transform preyToTarget = fr.GetClosestPrey(fr.flyPrey);
                 Debug.Log(preyToTarget);
-                HuntClosestPrey(fr.frogObject, preyToTarget);
+                fr.HuntClosestPrey(fr.frogObject, preyToTarget);
 
             }
         }
@@ -83,7 +82,22 @@ public class AnimalKingdom : MonoBehaviour
         {
             s.CheckBoundaries();
             s.MoveLegs();
-            s.Move();
+            //s.Move();
+
+            foreach (Frog fr in frogs)
+            {
+                s.frogPrey.Add(fr.frogObject.transform);
+            }
+            bool huntSuccessful;
+            Transform preyToTarget = s.GetClosestPrey(s.frogPrey);
+            Debug.Log(preyToTarget);
+
+            huntSuccessful = s.HuntClosestPrey(s.mover, preyToTarget);
+            if (huntSuccessful)
+            {
+                //TODO fix this, i think you get the idea (find a way to remove the specific class object).
+                frogs.Remove(preyToTarget.gameObject);
+            }
         }
 
         if(flies.Count <= sporadicFlyMinPopulation && flies.Count < sporadicFlyPopulation)
@@ -123,30 +137,30 @@ public class AnimalKingdom : MonoBehaviour
         }
     }
 
-    Transform GetClosestPrey(List<Transform> prey)
-    {
-        Transform bestTarget = null;
-        float closestDistanceSqr = Mathf.Infinity;
-        Vector3 currentPosition = transform.position;
-        foreach (Transform potentialTarget in prey)
-        {
-            Vector3 directionToTarget = potentialTarget.position - currentPosition;
-            float dSqrToTarget = directionToTarget.sqrMagnitude;
-            if (dSqrToTarget < closestDistanceSqr)
-            {
-                closestDistanceSqr = dSqrToTarget;
-                bestTarget = potentialTarget;
-            }
-        }
+    //Transform GetClosestPrey(List<Transform> prey)
+    //{
+    //    Transform bestTarget = null;
+    //    float closestDistanceSqr = Mathf.Infinity;
+    //    Vector3 currentPosition = transform.position;
+    //    foreach (Transform potentialTarget in prey)
+    //    {
+    //        Vector3 directionToTarget = potentialTarget.position - currentPosition;
+    //        float dSqrToTarget = directionToTarget.sqrMagnitude;
+    //        if (dSqrToTarget < closestDistanceSqr)
+    //        {
+    //            closestDistanceSqr = dSqrToTarget;
+    //            bestTarget = potentialTarget;
+    //        }
+    //    }
 
-        return bestTarget;
-    }
+    //    return bestTarget;
+    //}
 
-    void HuntClosestPrey(GameObject predator, Transform preyPos)
-    {
-        Vector3 relativePos = preyPos.position - predator.transform.position;
-        predator.GetComponent<Rigidbody>().AddForce(100 * relativePos);
-    }
+    //void HuntClosestPrey(GameObject predator, Transform preyPos)
+    //{
+    //    Vector3 relativePos = preyPos.position - predator.transform.position;
+    //    predator.GetComponent<Rigidbody>().AddForce(100 * relativePos);
+    //}
 
     //void Hunt(GameObject predator, Transform predatorPos, Transform preyPos)
     //{
