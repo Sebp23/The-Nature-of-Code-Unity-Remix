@@ -182,12 +182,15 @@ public class SpiderMover
         Vector3 currentPosition = mover.transform.position;
         foreach (Transform potentialTarget in prey)
         {
-            Vector3 directionToTarget = potentialTarget.position - currentPosition;
-            float dSqrToTarget = directionToTarget.sqrMagnitude;
-            if (dSqrToTarget < closestDistanceSqr)
+            if(potentialTarget != null)
             {
-                closestDistanceSqr = dSqrToTarget;
-                bestTarget = potentialTarget;
+                Vector3 directionToTarget = potentialTarget.position - currentPosition;
+                float dSqrToTarget = directionToTarget.sqrMagnitude;
+                if (dSqrToTarget < closestDistanceSqr)
+                {
+                    closestDistanceSqr = dSqrToTarget;
+                    bestTarget = potentialTarget;
+                }
             }
         }
 
@@ -206,10 +209,12 @@ public class SpiderMover
         relativePos = new Vector3(relativePos.x, 0f, relativePos.z);
         predator.GetComponent<Rigidbody>().AddForce(2f * relativePos);
         float dist = Vector3.Distance(preyTransform.position, predator.transform.position);
-        if (dist <= 4)
+        if (dist <= 4 && preyTransform.gameObject != null)
         {
-            preyTransform.gameObject.GetComponent<FrogBehavior>().enabled = false;
+            //preyTransform.gameObject.GetComponent<FrogBehavior>().enabled = false;
+            frogPrey.Remove(preyTransform);
             Object.Destroy(preyTransform.gameObject);
+            Debug.Log("Frog is dead");
             huntSuccessful = true;
         }
         else

@@ -126,6 +126,7 @@ public class Frog
     public float radius;
 
     public bool jumpCooldownElapsed = true;
+    public bool frogAlive = true;
 
     float xMin;
     float xMax;
@@ -171,76 +172,80 @@ public class Frog
 
     public void CheckBoundaries()
     {
-        //No need for restrained velocity, since it should stop after every jump. These fields below essentially makes sure it stays in the box.
-        //If the frog attempts to go outside of the box, its position will simply reset to be inside the box. The use of positive
-        //and negative in the field names, is simply to distinguish whether it is adding or subtracting the radius to get the position it should be sent
-        //back to.
-        Vector3 originXPositive = new Vector3(xMin + radius, frogObject.transform.position.y, frogObject.transform.position.z);
-        Vector3 originXNegative = new Vector3(xMax - radius, frogObject.transform.position.y, frogObject.transform.position.z);
-        Vector3 originY = new Vector3(frogObject.transform.position.x, yMin + radius, frogObject.transform.position.z);
-        Vector3 originZPositive = new Vector3(frogObject.transform.position.x, frogObject.transform.position.y, zMin + radius);
-        Vector3 originZNegative = new Vector3(frogObject.transform.position.x, frogObject.transform.position.y, zMax - radius);
-
-        if (body.position.y - radius < yMin)
+        if (frogObject != null)
         {
-            body.velocity = Vector3.zero;
-            frogObject.transform.position = originY;
+            //No need for restrained velocity, since it should stop after every jump. These fields below essentially makes sure it stays in the box.
+            //If the frog attempts to go outside of the box, its position will simply reset to be inside the box. The use of positive
+            //and negative in the field names, is simply to distinguish whether it is adding or subtracting the radius to get the position it should be sent
+            //back to.
+            Vector3 originXPositive = new Vector3(xMin + radius, frogObject.transform.position.y, frogObject.transform.position.z);
+            Vector3 originXNegative = new Vector3(xMax - radius, frogObject.transform.position.y, frogObject.transform.position.z);
+            Vector3 originY = new Vector3(frogObject.transform.position.x, yMin + radius, frogObject.transform.position.z);
+            Vector3 originZPositive = new Vector3(frogObject.transform.position.x, frogObject.transform.position.y, zMin + radius);
+            Vector3 originZNegative = new Vector3(frogObject.transform.position.x, frogObject.transform.position.y, zMax - radius);
+
+            if (body.position.y - radius < yMin)
+            {
+                body.velocity = Vector3.zero;
+                frogObject.transform.position = originY;
+            }
+            //the frog should never get high enough to touch the ceiling, so no worries there.
+
+            if (body.position.x - radius < xMin)
+            {
+                frogObject.transform.position = originXPositive;
+            }
+            else if (body.position.x + radius > xMax)
+            {
+                frogObject.transform.position = originXNegative;
+            }
+
+            if (body.position.z - radius < zMin)
+            {
+                frogObject.transform.position = originZPositive;
+            }
+            else if (body.position.z + radius > zMax)
+            {
+                frogObject.transform.position = originZNegative;
+            }
+
+            ///POSSIBLE FIX FOR FROG BOUNDARIES IF NECESSARY
+            ////Get the current position of each leg every fixed update. If one of the legs has gone beyond the box, then reset it to be at the box border.
+            //float xPos = frogObject.transform.position.x;
+            //float yPos = frogObject.transform.position.y;
+            //float zPos = frogObject.transform.position.z;
+
+            ////x position
+            //if (xPos > xMax - radius)
+            //{
+            //    frogObject.transform.position = new Vector3(xMax - radius, yPos, zPos);
+            //}
+            //else if (xPos < xMin + radius)
+            //{
+            //    frogObject.transform.position = new Vector3(xMin + radius, yPos, zPos);
+            //}
+
+            ////y position
+            //if (yPos > yMax - radius)
+            //{
+            //    frogObject.transform.position = new Vector3(xPos, yMax - radius, zPos);
+            //}
+            //else if (yPos < yMin + radius)
+            //{
+            //    frogObject.transform.position = new Vector3(xPos, yMin + radius, zPos);
+            //}
+
+            ////z position
+            //if (zPos > zMax - radius)
+            //{
+            //    frogObject.transform.position = new Vector3(xPos, yPos, zMax - radius);
+            //}
+            //else if (zPos < zMin + radius)
+            //{
+            //    frogObject.transform.position = new Vector3(xPos, yPos, zMin + radius);
+            //}
         }
-        //the frog should never get high enough to touch the ceiling, so no worries there.
 
-        if (body.position.x - radius < xMin)
-        {
-            frogObject.transform.position = originXPositive;
-        }
-        else if (body.position.x + radius > xMax)
-        {
-            frogObject.transform.position = originXNegative;
-        }
-
-        if (body.position.z - radius < zMin)
-        {
-            frogObject.transform.position = originZPositive;
-        }
-        else if (body.position.z + radius > zMax)
-        {
-            frogObject.transform.position = originZNegative;
-        }
-
-        ///POSSIBLE FIX FOR FROG BOUNDARIES IF NECESSARY
-        ////Get the current position of each leg every fixed update. If one of the legs has gone beyond the box, then reset it to be at the box border.
-        //float xPos = frogObject.transform.position.x;
-        //float yPos = frogObject.transform.position.y;
-        //float zPos = frogObject.transform.position.z;
-
-        ////x position
-        //if (xPos > xMax - radius)
-        //{
-        //    frogObject.transform.position = new Vector3(xMax - radius, yPos, zPos);
-        //}
-        //else if (xPos < xMin + radius)
-        //{
-        //    frogObject.transform.position = new Vector3(xMin + radius, yPos, zPos);
-        //}
-
-        ////y position
-        //if (yPos > yMax - radius)
-        //{
-        //    frogObject.transform.position = new Vector3(xPos, yMax - radius, zPos);
-        //}
-        //else if (yPos < yMin + radius)
-        //{
-        //    frogObject.transform.position = new Vector3(xPos, yMin + radius, zPos);
-        //}
-
-        ////z position
-        //if (zPos > zMax - radius)
-        //{
-        //    frogObject.transform.position = new Vector3(xPos, yPos, zMax - radius);
-        //}
-        //else if (zPos < zMin + radius)
-        //{
-        //    frogObject.transform.position = new Vector3(xPos, yPos, zMin + radius);
-        //}
     }
 
     //wait for 2 seconds, then call the jump function
@@ -281,42 +286,55 @@ public class Frog
 
     public void Jump()
     {
-        //make sure the frog is on the ground before it jumps
-        if(frogObject.transform.position.y <= yMin + radius)
+        if(frogObject != null)
         {
-            //make sure that the frog is adding to its velocity when it jumps
-            body.velocity = Vector3.zero;
+            //make sure the frog is on the ground before it jumps
+            if (frogObject.transform.position.y <= yMin + radius)
+            {
+                //make sure that the frog is adding to its velocity when it jumps
+                body.velocity = Vector3.zero;
 
-            //change the direction it jumps. It will always jump the same height.
-            jumpForce = new Vector3(Random.Range(-10f, 10f), 25f, Random.Range(-10f, 10f));
-            body.AddForce(jumpForce, ForceMode.Impulse);
+                //change the direction it jumps. It will always jump the same height.
+                jumpForce = new Vector3(Random.Range(-10f, 10f), 25f, Random.Range(-10f, 10f));
+                body.AddForce(jumpForce, ForceMode.Impulse);
+            }
         }
     }
 
     public Transform GetClosestPrey(List<Transform> prey)
     {
-        Transform bestTarget = null;
-        float closestDistanceSqr = Mathf.Infinity;
-        Vector3 currentPosition = frogObject.transform.position;
-        foreach (Transform potentialTarget in prey)
+        if(frogObject != null)
         {
-            Vector3 directionToTarget = potentialTarget.position - currentPosition;
-            float dSqrToTarget = directionToTarget.sqrMagnitude;
-            if (dSqrToTarget < closestDistanceSqr)
+            Transform bestTarget = null;
+            float closestDistanceSqr = Mathf.Infinity;
+            Vector3 currentPosition = frogObject.transform.position;
+            foreach (Transform potentialTarget in prey)
             {
-                closestDistanceSqr = dSqrToTarget;
-                bestTarget = potentialTarget;
+                Vector3 directionToTarget = potentialTarget.position - currentPosition;
+                float dSqrToTarget = directionToTarget.sqrMagnitude;
+                if (dSqrToTarget < closestDistanceSqr)
+                {
+                    closestDistanceSqr = dSqrToTarget;
+                    bestTarget = potentialTarget;
+                }
             }
-        }
 
-        return bestTarget;
+            return bestTarget;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     //TODO add way for frog to kill fly
     public void HuntClosestPrey(GameObject predator, Transform preyPos)
     {
-        Vector3 relativePos = preyPos.position - predator.transform.position;
-        predator.GetComponent<Rigidbody>().AddForce(100 * relativePos);
+        if(frogObject != null)
+        {
+            Vector3 relativePos = preyPos.position - predator.transform.position;
+            predator.GetComponent<Rigidbody>().AddForce(100 * relativePos);
+        }
     }
 }
 

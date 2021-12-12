@@ -31,6 +31,8 @@ public class AnimalKingdom : MonoBehaviour
     public float zMin;
     public float zMax;
 
+    public bool spiderHuntSuccessful;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -62,20 +64,23 @@ public class AnimalKingdom : MonoBehaviour
         }
         foreach (Frog fr in frogs)
         {
-            fr.CheckBoundaries();
-            //only jump every 2 seconds
-            if (fr.jumpCooldownElapsed)
+            if (fr.frogAlive)
             {
-                fr.jumpCooldownElapsed = false;
-                StartCoroutine(fr.JumpCooldown());
-                foreach (Fly f in flies)
+                fr.CheckBoundaries();
+                //only jump every 2 seconds
+                if (fr.jumpCooldownElapsed && fr.frogAlive)
                 {
-                    fr.flyPrey.Add(f.fly.transform);
-                }
-                Transform preyToTarget = fr.GetClosestPrey(fr.flyPrey);
-                Debug.Log(preyToTarget);
-                fr.HuntClosestPrey(fr.frogObject, preyToTarget);
+                    fr.jumpCooldownElapsed = false;
+                    StartCoroutine(fr.JumpCooldown());
+                    foreach (Fly f in flies)
+                    {
+                        fr.flyPrey.Add(f.fly.transform);
+                    }
+                    Transform preyToTarget = fr.GetClosestPrey(fr.flyPrey);
+                    Debug.Log(preyToTarget);
+                    fr.HuntClosestPrey(fr.frogObject, preyToTarget);
 
+                }
             }
         }
         foreach (SpiderMover s in spiders)
@@ -86,17 +91,35 @@ public class AnimalKingdom : MonoBehaviour
 
             foreach (Frog fr in frogs)
             {
-                s.frogPrey.Add(fr.frogObject.transform);
+                if(fr.frogObject != null)
+                {
+                    s.frogPrey.Add(fr.frogObject.transform);
+                }
             }
-            bool huntSuccessful;
             Transform preyToTarget = s.GetClosestPrey(s.frogPrey);
-            Debug.Log(preyToTarget);
+            int frogPreyID = preyToTarget.GetHashCode();
+            //Debug.Log(preyToTarget);
+            
 
-            huntSuccessful = s.HuntClosestPrey(s.mover, preyToTarget);
-            if (huntSuccessful)
+            spiderHuntSuccessful = s.HuntClosestPrey(s.mover, preyToTarget);
+            if (spiderHuntSuccessful)
             {
-                //TODO fix this, i think you get the idea (find a way to remove the specific class object).
-                frogs.Remove(preyToTarget.gameObject);
+                foreach (Frog fr in frogs)
+                {
+                    int frogInList = fr.GetHashCode();
+                    if (frogInList == frogPreyID)
+                    {
+
+                        //TODO fix this, i think you get the idea (find a way to remove the specific class object).
+                        //try to get index number of frog object in the class, then use that to destroy the proper frog object.
+                        //have an "alive" bool for each animal
+                        fr.frogAlive = false;
+                        //s.frogPrey.Remove(fr.frogObject.transform);
+                        s.frogPrey.Clear();
+                        frogs.Remove(fr);
+                    }
+                }
+                spiderHuntSuccessful = false;
             }
         }
 
