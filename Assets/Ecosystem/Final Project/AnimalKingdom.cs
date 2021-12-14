@@ -6,18 +6,21 @@ public class AnimalKingdom : MonoBehaviour
 {
     public List<Fly> flies = new List<Fly>();
     public Fly fly;
-    public int sporadicFlyPopulation;
-    public int sporadicFlyMinPopulation;
+    public int flyCurrentPopulation;
+    public int sporadicFlyMaxPopulation = 15;
+    public int sporadicFlyMinPopulation = 10;
 
     public List<Frog> frogs = new List<Frog>();
     public Frog frog;
-    public int frogPopulation;
-    public int frogMinPopulation;
+    public int frogCurrentPopulation;
+    public int frogMaxPopulation = 5;
+    public int frogMinPopulation = 1;
 
     public List<SpiderMover> spiders = new List<SpiderMover>();
     public SpiderMover spider;
-    public int spiderPopulation;
-    public int spiderMinPopulation;
+    public int spiderCurrentPopulation;
+    public int spiderMaxPopulation = 2;
+    public int spiderMinPopulation = 1;
 
     //Terrain
     public PerlinTerrain terrain;
@@ -31,27 +34,32 @@ public class AnimalKingdom : MonoBehaviour
     public float zMin;
     public float zMax;
 
+    public bool frogHuntSuccessful;
     public bool spiderHuntSuccessful;
 
     // Start is called before the first frame update
     void Start()
     {
-        for (int i = 0; i < sporadicFlyPopulation; i++)
+        for (int i = 0; i < sporadicFlyMaxPopulation; i++)
         {
             fly = new Fly(new Vector3(Random.Range(xMin, xMax), Random.Range(yMin, yMax), Random.Range(zMin, zMax)), xMin, xMax, yMin, yMax, zMin, zMax);
             flies.Add(fly);
 
         }
-        for (int i = 0; i < frogPopulation; i++)
+        for (int i = 0; i < frogMaxPopulation; i++)
         {
             frog = new Frog(new Vector3(Random.Range(xMin, xMax), yMin, Random.Range(zMin, zMax)), xMin, xMax, yMin, yMax, zMin, zMax);
             frogs.Add(frog);
         }
-        for (int i = 0; i < spiderPopulation; i++)
+        for (int i = 0; i < spiderMaxPopulation; i++)
         {
             spider = new SpiderMover(new Vector3(Random.Range(xMin, xMax), yMin, Random.Range(zMin, zMax)), xMin, xMax, yMin, yMax, zMin, zMax);
             spiders.Add(spider);
         }
+
+        flyCurrentPopulation = flies.Count;
+        frogCurrentPopulation = frogs.Count;
+        spiderCurrentPopulation = spiders.Count;
     }
 
     // Update is called once per frame
@@ -59,8 +67,11 @@ public class AnimalKingdom : MonoBehaviour
     {
         foreach (Fly f in flies)
         {
-            f.CheckBoundaries();
-            f.MoveFly();
+            if (f.flyAlive)
+            {
+                f.CheckBoundaries();
+                f.MoveFly();
+            }
         }
         foreach (Frog fr in frogs)
         {
@@ -74,11 +85,31 @@ public class AnimalKingdom : MonoBehaviour
                     StartCoroutine(fr.JumpCooldown());
                     foreach (Fly f in flies)
                     {
-                        fr.flyPrey.Add(f.fly.transform);
+                        if (f.fly != null)
+                        {
+                            fr.flyPrey.Add(f.fly.transform);
+                        }
                     }
                     Transform preyToTarget = fr.GetClosestPrey(fr.flyPrey);
-                    Debug.Log(preyToTarget);
-                    fr.HuntClosestPrey(fr.frogObject, preyToTarget);
+
+                    if(preyToTarget != null)
+                    {
+                        int flyPreyID = preyToTarget.GetHashCode();
+                        frogHuntSuccessful = fr.HuntClosestPrey(fr.frogObject, preyToTarget);
+                        if (frogHuntSuccessful)
+                        {
+                            frogHuntSuccessful = false;
+                            flyCurrentPopulation--;
+                        }
+                        else
+                        {
+                            frogHuntSuccessful = fr.HuntClosestPrey(fr.frogObject, preyToTarget);
+                        }
+                    }
+                    else
+                    {
+                        preyToTarget = fr.GetClosestPrey(fr.flyPrey);
+                    }
 
                 }
             }
@@ -87,7 +118,6 @@ public class AnimalKingdom : MonoBehaviour
         {
             s.CheckBoundaries();
             s.MoveLegs();
-            //s.Move();
 
             foreach (Frog fr in frogs)
             {
@@ -97,98 +127,61 @@ public class AnimalKingdom : MonoBehaviour
                 }
             }
             Transform preyToTarget = s.GetClosestPrey(s.frogPrey);
-            int frogPreyID = preyToTarget.GetHashCode();
-            //Debug.Log(preyToTarget);
-            
 
-            spiderHuntSuccessful = s.HuntClosestPrey(s.mover, preyToTarget);
-            if (spiderHuntSuccessful)
+            if (preyToTarget != null)
             {
-                foreach (Frog fr in frogs)
+                spiderHuntSuccessful = s.HuntClosestPrey(s.mover, preyToTarget);
+                if (spiderHuntSuccessful)
                 {
-                    int frogInList = fr.GetHashCode();
-                    if (frogInList == frogPreyID)
-                    {
-
-                        //TODO fix this, i think you get the idea (find a way to remove the specific class object).
-                        //try to get index number of frog object in the class, then use that to destroy the proper frog object.
-                        //have an "alive" bool for each animal
-                        fr.frogAlive = false;
-                        //s.frogPrey.Remove(fr.frogObject.transform);
-                        s.frogPrey.Clear();
-                        frogs.Remove(fr);
-                    }
+                    spiderHuntSuccessful = false;
+                    frogCurrentPopulation--;
                 }
-                spiderHuntSuccessful = false;
+                else
+                {
+                    spiderHuntSuccessful = s.HuntClosestPrey(s.mover, preyToTarget);
+                }
             }
+            else
+            {
+                preyToTarget = s.GetClosestPrey(s.frogPrey);
+            }
+
         }
 
-        if(flies.Count <= sporadicFlyMinPopulation && flies.Count < sporadicFlyPopulation)
-        {
-            StartCoroutine(circleOfLife(fly.fly, new Vector3(Random.Range(xMin, xMax), Random.Range(yMin, yMax), Random.Range(zMin, zMax))));
-        }
-        if(frogs.Count <= frogMinPopulation && frogs.Count < frogPopulation)
-        {
-            StartCoroutine(circleOfLife(frog.frogObject, new Vector3(Random.Range(xMin, xMax), yMin, Random.Range(zMin, zMax))));
-        }
-        if (spiders.Count <= spiderMinPopulation && spiders.Count < spiderPopulation)
-        {
-            StartCoroutine(circleOfLife(spider.mover, new Vector3(Random.Range(xMin, xMax), yMin, Random.Range(zMin, zMax))));
-        }
+        //check the current population size of each animal to see if it needs to be increased.
+        StartCoroutine(circleOfLife(fly.fly, new Vector3(Random.Range(xMin, xMax), Random.Range(yMin, yMax), Random.Range(zMin, zMax))));
+        StartCoroutine(circleOfLife(frog.frogObject, new Vector3(Random.Range(xMin, xMax), yMin, Random.Range(zMin, zMax))));
+        StartCoroutine(circleOfLife(spider.mover, new Vector3(Random.Range(xMin, xMax), yMin, Random.Range(zMin, zMax))));
     }
 
     IEnumerator circleOfLife(GameObject prey, Vector3 position)
     {
         yield return new WaitForSeconds(2f);
-        //Fly
-        if(prey.name == fly.fly.name || prey.name == fly.fly.name + "(Clone)")
+
+        if (flyCurrentPopulation < sporadicFlyMaxPopulation)
         {
             Fly f = new Fly(position, xMin, xMax, yMin, yMax, zMin, zMax);
             flies.Add(f);
+            Debug.Log(flyCurrentPopulation);
+            flyCurrentPopulation++;
+            Debug.Log(flyCurrentPopulation);
+            StopCoroutine("circleOfLife()");
         }
-        //Frog
-        if(prey.name == frog.frogObject.name || prey.name == frog.frogObject.name + "(Clone)")
+
+        if (frogCurrentPopulation < frogMaxPopulation)
         {
             Frog fr = new Frog(position, xMin, xMax, yMin, yMax, zMin, zMax);
             frogs.Add(fr);
+            frogCurrentPopulation++;
+            StopCoroutine("circleOfLife()");
         }
-        //Spider
-        if(prey.name == spider.mover.name || prey.name == spider.mover.name + "(Clone)")
+
+        if (spiderCurrentPopulation < spiderMaxPopulation)
         {
             SpiderMover s = new SpiderMover(position, xMin, xMax, yMin, yMax, zMin, zMax);
             spiders.Add(s);
+            spiderCurrentPopulation++;
+            StopCoroutine("circleOfLife()");
         }
     }
-
-    //Transform GetClosestPrey(List<Transform> prey)
-    //{
-    //    Transform bestTarget = null;
-    //    float closestDistanceSqr = Mathf.Infinity;
-    //    Vector3 currentPosition = transform.position;
-    //    foreach (Transform potentialTarget in prey)
-    //    {
-    //        Vector3 directionToTarget = potentialTarget.position - currentPosition;
-    //        float dSqrToTarget = directionToTarget.sqrMagnitude;
-    //        if (dSqrToTarget < closestDistanceSqr)
-    //        {
-    //            closestDistanceSqr = dSqrToTarget;
-    //            bestTarget = potentialTarget;
-    //        }
-    //    }
-
-    //    return bestTarget;
-    //}
-
-    //void HuntClosestPrey(GameObject predator, Transform preyPos)
-    //{
-    //    Vector3 relativePos = preyPos.position - predator.transform.position;
-    //    predator.GetComponent<Rigidbody>().AddForce(100 * relativePos);
-    //}
-
-    //void Hunt(GameObject predator, Transform predatorPos, Transform preyPos)
-    //{
-    //    Vector3 relativePos = preyPos.position - predatorPos.position;
-    //    predator.GetComponent<Rigidbody>().AddForce(100 * relativePos);
-    //    //Invoke("ApplyFlightDirection", 1.0f);
-    //}
 }

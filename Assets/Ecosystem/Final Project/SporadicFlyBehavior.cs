@@ -4,20 +4,6 @@ using UnityEngine;
 
 public class SporadicFlyBehavior : MonoBehaviour
 {
-    ////fly location and speed
-    //Vector3 location = new Vector3(0, 0, 0);
-    //public Vector3 velocity = new Vector3(1f, 1f, 1f);
-    //Vector3 acceleration = new Vector3(0, 0, 0);
-    //float topSpeed = 4f;
-
-    ////Box walls to help with boundaries for fly.
-    ////public Transform leftWall;
-    ////public Transform rightWall;
-    ////public Transform ceiling;
-    ////public Transform floor;
-    ////public Transform backWall;
-    ////public Transform frontWall;
-
     public float leftWall;
     public float rightWall;
     public float ceiling;
@@ -45,6 +31,8 @@ public class SporadicFlyBehavior : MonoBehaviour
 
 public class Fly
 {
+    float radius = 1f;
+
     //fly location and speed
     Vector3 location = new Vector3(0, 0, 0);
     Vector3 velocity = new Vector3(1f, 1f, 1f);
@@ -60,11 +48,13 @@ public class Fly
 
     public GameObject fly;
 
+    public bool flyAlive = true;
+
     public Fly(Vector3 spawnPosition, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax)
     {
         leftWall = xMin;
         rightWall = xMax;
-        floor = yMin;
+        floor = yMin + radius;
         ceiling = yMax;
         frontWall = zMin;
         backWall = zMax;
@@ -85,40 +75,46 @@ public class Fly
 
     public void MoveFly()
     {
-        // Random acceleration but it's not normalized!
-        acceleration = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f));
-        // Normilize the acceletation
-        acceleration.Normalize();
-        // Now we can scale the magnitude as we wish!
-        acceleration *= Random.Range(5f, 20f);
+        if (fly != null)
+        {
+            // Random acceleration but it's not normalized!
+            acceleration = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f));
+            // Normilize the acceletation
+            acceleration.Normalize();
+            // Now we can scale the magnitude as we wish!
+            acceleration *= Random.Range(5f, 20f);
 
-        // Speeds up the mover
-        velocity += acceleration * Time.deltaTime; // Time.deltaTime is the time passed since the last frame.
+            // Speeds up the mover
+            velocity += acceleration * Time.deltaTime; // Time.deltaTime is the time passed since the last frame.
 
-        velocity = Vector3.ClampMagnitude(velocity, topSpeed);
+            velocity = Vector3.ClampMagnitude(velocity, topSpeed);
 
-        location += velocity * Time.deltaTime;
+            location += velocity * Time.deltaTime;
 
-        // Now we apply the positions to the fly to put it in it's place
-        fly.transform.position = new Vector3(location.x, location.y, location.z);
+            // Now we apply the positions to the fly to put it in it's place
+            fly.transform.position = new Vector3(location.x, location.y, location.z);
+        }
     }
 
     //check to see when the fly hits a wall, then change its direction when it does
     public void CheckBoundaries()
     {
-        if (fly.transform.position.x <= leftWall || fly.transform.position.x >= rightWall)
+        if (fly != null)
         {
-            velocity.x = -velocity.x;
-        }
+            if (fly.transform.position.x <= leftWall || fly.transform.position.x >= rightWall)
+            {
+                velocity.x = -velocity.x;
+            }
 
-        if (fly.transform.position.y <= floor || fly.transform.position.y >= ceiling)
-        {
-            velocity.y = -velocity.y;
-        }
+            if (fly.transform.position.y <= floor || fly.transform.position.y >= ceiling)
+            {
+                velocity.y = -velocity.y;
+            }
 
-        if (fly.transform.position.z <= frontWall || fly.transform.position.z >= backWall)
-        {
-            velocity.z = -velocity.z;
+            if (fly.transform.position.z <= frontWall || fly.transform.position.z >= backWall)
+            {
+                velocity.z = -velocity.z;
+            }
         }
     }
 }

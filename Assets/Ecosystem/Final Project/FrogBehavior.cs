@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class FrogBehavior : MonoBehaviour
 {
-    /// <summary>
-    /// All of the blocks of commented code are going to be modified eventuall for the frog tongue, which is why they haven't
-    /// been deleted.
-    /// </summary>
-
     //Box walls to help with boundaries for frog.
     public Transform leftWall;
     public Transform rightWall;
@@ -19,8 +14,6 @@ public class FrogBehavior : MonoBehaviour
     public Transform frogSpawn;
 
     public GameObject fly;
-
-    //public bool jumpCooldownElapsed = true;
 
     Frog frog;
     FrogTongue frogTongue;
@@ -41,32 +34,6 @@ public class FrogBehavior : MonoBehaviour
         //make sure the frog is still in the box
         frog.CheckBoundaries();
 
-        //frogTongue.velocity = fly.transform.position;
-        //frogTongue.amplitude = fly.transform.position;
-
-        ////Each oscillator object oscillating on the x-axis
-        //float x = Mathf.Sin(frogTongue.angle.x) * frogTongue.amplitude.x;
-        ////Each oscillator object oscillating on the y-axis
-        //float y = Mathf.Sin(frogTongue.angle.y) * frogTongue.amplitude.y;
-        //float z = Mathf.Sin(frogTongue.angle.z) * frogTongue.amplitude.z;
-
-        ////Add the oscillator's velocity to its angle
-        //frogTongue.angle += frogTongue.velocity;
-
-        //frogTongue.oGameObject.transform.Translate(new Vector3(x, y, z) * Time.deltaTime);
-
-        ////frogTongue.oGameObject.transform.LookAt(fly.transform.position);
-        ////frogTongue.oGameObject.transform.Translate(fly.transform.position * Time.deltaTime);
-
-
-        //// Draw the line for each oscillator
-        //frogTongue.lineRender.SetPosition(0, frog.frogObject.transform.position);
-        ////Debug.Log(sMover.mover.transform.position);
-        //frogTongue.lineRender.SetPosition(1, frogTongue.oGameObject.transform.position);
-        ////Destroy(frog.frogObject);
-        ////Destroy(frogTongue.oGameObject);
-        ////Destroy(frogTongue.lineRender);
-
         //only jump every 2 seconds
         if (frog.jumpCooldownElapsed)
         {
@@ -74,42 +41,6 @@ public class FrogBehavior : MonoBehaviour
             StartCoroutine(frog.JumpCooldown());
         }
     }
-
-    ////wait for 2 seconds, then call the jump function
-    //IEnumerator JumpCooldown()
-    //{
-    //    yield return new WaitForSeconds(jumpCooldownTime);
-
-    //    frog.Jump();
-
-    //    frogTongue.velocity = fly.transform.position;
-    //    frogTongue.amplitude = fly.transform.position;
-
-    //    //Each oscillator object oscillating on the x-axis
-    //    float x = Mathf.Sin(frogTongue.angle.x) * frogTongue.amplitude.x;
-    //    //Each oscillator object oscillating on the y-axis
-    //    float y = Mathf.Sin(frogTongue.angle.y) * frogTongue.amplitude.y;
-    //    float z = Mathf.Sin(frogTongue.angle.z) * frogTongue.amplitude.z;
-
-    //    //Add the oscillator's velocity to its angle
-    //    frogTongue.angle += frogTongue.velocity;
-
-    //   // frogTongue.oGameObject.transform.Translate(new Vector3(x, y, z) * Time.deltaTime);
-
-    //    frogTongue.oGameObject.transform.LookAt(fly.transform.position);
-    //    //frogTongue.oGameObject.transform.Translate(fly.transform.position * Time.deltaTime);
-
-
-    //    // Draw the line for each oscillator
-    //    frogTongue.lineRender.SetPosition(0, frog.frogObject.transform.position);
-    //    //Debug.Log(sMover.mover.transform.position);
-    //    frogTongue.lineRender.SetPosition(1, frogTongue.oGameObject.transform.position);
-    //    //Destroy(frog.frogObject);
-    //    //Destroy(frogTongue.oGameObject);
-    //    //Destroy(frogTongue.lineRender);
-
-    //    jumpCooldownElapsed = true;
-    //}
 }
 
 public class Frog
@@ -149,12 +80,6 @@ public class Frog
         frogObject.name = "Frog";
         frogObject.tag = "FlyPredator";
         body = frogObject.AddComponent<Rigidbody>();
-
-        ///<summary>
-        ///The PredatorAttack Script is having weird force errors, and I'm not quite sure how to fix them
-        /// </summary>
-        //PredatorAttack frogPredator = frogObject.AddComponent<PredatorAttack>();
-        //frogPredator.predatorTag = "FlyPredator";
 
         frogCollider = frogObject.GetComponent<SphereCollider>();
         Renderer frogRenderer = frogObject.GetComponent<Renderer>();
@@ -208,44 +133,7 @@ public class Frog
             {
                 frogObject.transform.position = originZNegative;
             }
-
-            ///POSSIBLE FIX FOR FROG BOUNDARIES IF NECESSARY
-            ////Get the current position of each leg every fixed update. If one of the legs has gone beyond the box, then reset it to be at the box border.
-            //float xPos = frogObject.transform.position.x;
-            //float yPos = frogObject.transform.position.y;
-            //float zPos = frogObject.transform.position.z;
-
-            ////x position
-            //if (xPos > xMax - radius)
-            //{
-            //    frogObject.transform.position = new Vector3(xMax - radius, yPos, zPos);
-            //}
-            //else if (xPos < xMin + radius)
-            //{
-            //    frogObject.transform.position = new Vector3(xMin + radius, yPos, zPos);
-            //}
-
-            ////y position
-            //if (yPos > yMax - radius)
-            //{
-            //    frogObject.transform.position = new Vector3(xPos, yMax - radius, zPos);
-            //}
-            //else if (yPos < yMin + radius)
-            //{
-            //    frogObject.transform.position = new Vector3(xPos, yMin + radius, zPos);
-            //}
-
-            ////z position
-            //if (zPos > zMax - radius)
-            //{
-            //    frogObject.transform.position = new Vector3(xPos, yPos, zMax - radius);
-            //}
-            //else if (zPos < zMin + radius)
-            //{
-            //    frogObject.transform.position = new Vector3(xPos, yPos, zMin + radius);
-            //}
         }
-
     }
 
     //wait for 2 seconds, then call the jump function
@@ -254,32 +142,6 @@ public class Frog
         yield return new WaitForSeconds(jumpCooldownTime);
 
         Jump();
-
-        //frogTongue.velocity = fly.transform.position;
-        //frogTongue.amplitude = fly.transform.position;
-
-        ////Each oscillator object oscillating on the x-axis
-        //float x = Mathf.Sin(frogTongue.angle.x) * frogTongue.amplitude.x;
-        ////Each oscillator object oscillating on the y-axis
-        //float y = Mathf.Sin(frogTongue.angle.y) * frogTongue.amplitude.y;
-        //float z = Mathf.Sin(frogTongue.angle.z) * frogTongue.amplitude.z;
-
-        ////Add the oscillator's velocity to its angle
-        //frogTongue.angle += frogTongue.velocity;
-
-        //// frogTongue.oGameObject.transform.Translate(new Vector3(x, y, z) * Time.deltaTime);
-
-        //frogTongue.oGameObject.transform.LookAt(fly.transform.position);
-        ////frogTongue.oGameObject.transform.Translate(fly.transform.position * Time.deltaTime);
-
-
-        //// Draw the line for each oscillator
-        //frogTongue.lineRender.SetPosition(0, frog.frogObject.transform.position);
-        ////Debug.Log(sMover.mover.transform.position);
-        //frogTongue.lineRender.SetPosition(1, frogTongue.oGameObject.transform.position);
-        ////Destroy(frog.frogObject);
-        ////Destroy(frogTongue.oGameObject);
-        ////Destroy(frogTongue.lineRender);
 
         jumpCooldownElapsed = true;
     }
@@ -294,8 +156,8 @@ public class Frog
                 //make sure that the frog is adding to its velocity when it jumps
                 body.velocity = Vector3.zero;
 
-                //change the direction it jumps. It will always jump the same height.
-                jumpForce = new Vector3(Random.Range(-10f, 10f), 25f, Random.Range(-10f, 10f));
+                //change the direction it jumps.
+                jumpForce = new Vector3(Random.Range(-10f, 10f), Random.Range(25f, 50f), Random.Range(-10f, 10f));
                 body.AddForce(jumpForce, ForceMode.Impulse);
             }
         }
@@ -303,38 +165,54 @@ public class Frog
 
     public Transform GetClosestPrey(List<Transform> prey)
     {
-        if(frogObject != null)
+        Transform bestTarget = null;
+
+        if (frogObject != null)
         {
-            Transform bestTarget = null;
             float closestDistanceSqr = Mathf.Infinity;
             Vector3 currentPosition = frogObject.transform.position;
             foreach (Transform potentialTarget in prey)
             {
-                Vector3 directionToTarget = potentialTarget.position - currentPosition;
-                float dSqrToTarget = directionToTarget.sqrMagnitude;
-                if (dSqrToTarget < closestDistanceSqr)
+                if(potentialTarget != null)
                 {
-                    closestDistanceSqr = dSqrToTarget;
-                    bestTarget = potentialTarget;
+                    Vector3 directionToTarget = potentialTarget.position - currentPosition;
+                    float dSqrToTarget = directionToTarget.sqrMagnitude;
+                    if (dSqrToTarget < closestDistanceSqr)
+                    {
+                        closestDistanceSqr = dSqrToTarget;
+                        bestTarget = potentialTarget;
+
+                        return bestTarget;
+                    }
                 }
             }
+        }
 
-            return bestTarget;
+        return bestTarget;
+    }
+    
+    public bool HuntClosestPrey(GameObject predator, Transform preyTransform)
+    {
+        bool huntSuccessful = false;
+
+        Vector3 relativePos = preyTransform.position - predator.transform.position;
+        relativePos = new Vector3(relativePos.x, relativePos.y, relativePos.z);
+        predator.GetComponent<Rigidbody>().AddForce(10f * relativePos);
+
+        float dist = Vector3.Distance(preyTransform.position, predator.transform.position);
+        
+        if (dist <= 10 && preyTransform.gameObject != null)
+        {
+            flyPrey.Remove(preyTransform);
+            Object.Destroy(preyTransform.gameObject);
+            huntSuccessful = true;
         }
         else
         {
-            return null;
+            huntSuccessful = false;
         }
-    }
 
-    //TODO add way for frog to kill fly
-    public void HuntClosestPrey(GameObject predator, Transform preyPos)
-    {
-        if(frogObject != null)
-        {
-            Vector3 relativePos = preyPos.position - predator.transform.position;
-            predator.GetComponent<Rigidbody>().AddForce(100 * relativePos);
-        }
+        return huntSuccessful;
     }
 }
 

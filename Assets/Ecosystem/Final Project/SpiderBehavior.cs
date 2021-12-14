@@ -37,12 +37,12 @@ public class SpiderMover
 
     public List<Transform> frogPrey = new List<Transform>();
 
-    Vector3 location = new Vector3(0, 0, 0);
+    Vector3 location;
     Vector3 velocity = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)); //1f, 1f, 1f);
 
     List<SpiderLegOscillator> legs = new List<SpiderLegOscillator>();
 
-    public Vector3 spiderPosition;
+    Vector3 spiderPosition;
 
     // Variables to limit the mover within the screen space
     float xMin, yMin, zMin, xMax, yMax, zMax;
@@ -53,6 +53,9 @@ public class SpiderMover
 
     public SpiderMover(Vector3 position, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax)
     {
+
+        location = position + Vector3.up * radius;
+
         this.xMin = xMin;
         this.xMax = xMax;
         this.yMin = yMin;
@@ -70,11 +73,10 @@ public class SpiderMover
         SphereCollider moverCollider = mover.GetComponent<SphereCollider>();
         moverCollider.enabled = false;
 
-        location = position + Vector3.up * radius;
-        Debug.Log(mover.transform.position + "|" + position);
-
         mover.name = "Spider";
         mover.tag = "FrogPredator";
+
+        mover.transform.position = location;
 
         spiderPosition = mover.transform.position;
 
@@ -82,7 +84,7 @@ public class SpiderMover
         {
             Vector3 spiderCurrentPos = mover.transform.position;
 
-            legs.Add(new SpiderLegOscillator(spiderCurrentPos, xMin, xMax, yMin, yMax, zMin, zMax));//oMover.mover.transform.position));
+            legs.Add(new SpiderLegOscillator(spiderCurrentPos, xMin, xMax, yMin, yMax, zMin, zMax));
         }
 
         foreach (SpiderLegOscillator s in legs)
@@ -166,7 +168,7 @@ public class SpiderMover
 
             // Draw the line for each oscillator
             s.lineRender.SetPosition(0, mover.transform.position);
-            Debug.Log(mover.transform.position);
+            //Debug.Log(mover.transform.position);
             s.lineRender.SetPosition(1, s.oGameObject.transform.position);
 
             //Move the oscillator
@@ -194,27 +196,23 @@ public class SpiderMover
             }
         }
 
-        Debug.Log("Best Target for Spider: " + bestTarget.position);
+        //Debug.Log("Best Target for Spider: " + bestTarget.position);
         return bestTarget;
         
     }
 
-    //make it return a bool and use this bool to decide when to hunt new object
-    //TODO find a way to make sure frog methods stop when it is caught by spider
     public bool HuntClosestPrey(GameObject predator, Transform preyTransform)
     {
         bool huntSuccessful = false;
 
         Vector3 relativePos = preyTransform.position - predator.transform.position;
         relativePos = new Vector3(relativePos.x, 0f, relativePos.z);
-        predator.GetComponent<Rigidbody>().AddForce(2f * relativePos);
+        predator.GetComponent<Rigidbody>().AddForce(0.03f * relativePos);
         float dist = Vector3.Distance(preyTransform.position, predator.transform.position);
-        if (dist <= 4 && preyTransform.gameObject != null)
+        if (dist <= 2 && preyTransform.gameObject != null)
         {
-            //preyTransform.gameObject.GetComponent<FrogBehavior>().enabled = false;
             frogPrey.Remove(preyTransform);
             Object.Destroy(preyTransform.gameObject);
-            Debug.Log("Frog is dead");
             huntSuccessful = true;
         }
         else

@@ -421,11 +421,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfb6e30d62dac5d4cb87a6e08bbb4a62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sporadicFlyPopulation: 10
-  sporadicFlyMinPopulation: 1
-  frogPopulation: 5
+  flyCurrentPopulation: 0
+  sporadicFlyMaxPopulation: 15
+  sporadicFlyMinPopulation: 10
+  frogCurrentPopulation: 0
+  frogMaxPopulation: 5
   frogMinPopulation: 1
-  spiderPopulation: 1
+  spiderCurrentPopulation: 0
+  spiderMaxPopulation: 2
   spiderMinPopulation: 1
   terrain: {fileID: 0}
   terrainMin: 0
@@ -435,3 +438,5 @@ MonoBehaviour:
   yMax: 20
   zMin: 0
   zMax: 50
+  frogHuntSuccessful: 0
+  spiderHuntSuccessful: 0
